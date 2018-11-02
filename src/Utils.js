@@ -4,7 +4,14 @@ class Utils{
 
     }
 
-    
+    GUID(){
+        let t = (new Date).getTime();
+        return "xxxxxxxx-xxxx-yxxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(e){
+            let n=(t+16*Math.random())%16|0;
+            t=Math.floor(t/16);
+            return ("x"==e?n:3&n|8).toString(16);
+        });
+    }
     //返回body最大的z-index
     getMaxZindex() {
         let elementObj = document.body;

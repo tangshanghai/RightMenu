@@ -51,13 +51,14 @@
     transform: rotate(-45deg);
     margin-right: 3px;
 }
-.right-menu-tsh li:hover,.right-menu-tsh li:hover .icon{
+.right-menu-tsh li:hover,.right-menu-tsh li:hover .icon,.right-menu-tsh li.selected,.right-menu-tsh li.selected .icon{
     color: #fff;
     background-color: #3999ff;
 }
-.right-menu-tsh li:hover .arrow{
+.right-menu-tsh li:hover .arrow,.right-menu-tsh li.selected .arrow{
     border-color: #fff;
 }
+
 .right-menu-tsh li.divider{
     color: #a1a192;
     height: 0px;
@@ -67,5 +68,8 @@
 }
 .right-menu-tsh li.disabled{
     color: #a1a192;
+    pointer-events: none;
+}
+.right-menu-tsh li *{
     pointer-events: none;
 }

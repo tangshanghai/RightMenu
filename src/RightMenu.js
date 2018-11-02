@@ -4,7 +4,7 @@ class RightMenu{
     constructor(){
 
         console.log('==============RightMenu 0.0.0=================')
-        this.root = null;//document.createElement('div');
+        this.mainMenu = null;//document.createElement('div');
         // this.root.classList.add('right-menu-tsh');
 
         this.callback = null;
@@ -63,19 +63,13 @@ class RightMenu{
      */
     createMenu(_menudata){
         let menus = _menudata.menus;
-        this.root = this.createMenuUl(menus);
-        
-        // this.root.appendChild(mainUl);
-
-        document.body.appendChild(this.root);
-        
-        // let pos = light.root.getBoundingClientRect();
-        //     this.main.root.style.left = pos.left+"px";
-        //     this.main.root.style.top = (pos.top+35)+"px";
-        this.root.style.zIndex = Utils.getMaxZindex();
-        // console.log(_menudata.event);
-        console.log(this.root.offsetWidth,this.root.offsetHeight)
-        let curW = this.root.offsetWidth,curH = this.root.offsetHeight,stageW = document.body.clientWidth,stageH = document.body.clientHeight;
+        this.mainMenu = this.createMenuUl(menus,1,'');
+        let rootUl = this.mainMenu.dom;
+        // console.log(this.mainMenu )
+        document.body.appendChild(rootUl);
+        rootUl.style.zIndex = Utils.getMaxZindex();
+        // console.log(this.root.offsetWidth,this.root.offsetHeight)
+        let curW = rootUl.offsetWidth,curH = rootUl.offsetHeight,stageW = document.body.clientWidth,stageH = document.body.clientHeight;
         let x = _menudata.event.clientX,y = _menudata.event.clientY;
         if(x+curW>stageW){
             x = Math.min(x-curW,stageW-curW);
@@ -83,40 +77,56 @@ class RightMenu{
         if(y+curH>stageH){
             y = Math.min(y-curH,stageH-curH);
         }
-        // x = Math.min(x,stageW-curW);
-        // y = Math.min(y,stageH-curH);
-        this.root.style.left = x+"px";
-        this.root.style.top = y+"px";
+        rootUl.style.left = x+"px";
+        rootUl.style.top = y+"px";
     }
 
     /**
      * 创建 ul
      */
-    createMenuUl(menuArr){
-        let ul = document.createElement('ul');
+    createMenuUl(menuArr,layerIndex,parentGuid){
+        let ulObj = {
+            type: 'ul',
+            dom: document.createElement('ul'),
+            lis: []
+        }
+        let ul = ulObj.dom;
         ul.classList.add('right-menu-tsh');
         for(let i=0;i<menuArr.length;i++){
-            let li = this.createMenuItem(menuArr[i]);
-            ul.appendChild(li);
+            let liObj = this.createMenuItem(menuArr[i],layerIndex,parentGuid);
+            ul.appendChild(liObj.dom);
+            ulObj.lis.push(liObj);
         }
-        return ul;
+        return ulObj;
     }
     /**
      * 创建 li
      */
-    createMenuItem(item){
-        let li = document.createElement('li');
+    createMenuItem(item,layerIndex,parentGuid){
+        let liObj = {
+            type:'li',
+            dom: document.createElement('li'),
+            ulObj: null,
+            guid: Utils.GUID(),
+            parentGuid: parentGuid,
+            layerIndex:layerIndex
+        }
+        let li = liObj.dom;
         li.classList.add('rm-menuitem');
-        li.carryData = item;
+        // li.setAttribute('guid',liObj.guid);
+        li.guid = liObj.guid;
+        li.layerIndex = liObj.layerIndex;
+        li.mark = item.mark;
         if(item.divider){
             li.classList.add('divider');
-            return li;
+            return liObj;
         }
         let icon = item.shortKey || '';
         if(item.menus && item.menus.length>0){
             icon = '<span class="arrow"></span>';
             // console.log(item.menus)
-            li.childrenMenus = this.createMenuUl(item.menus);
+            li.isChildren = true;
+            liObj.ulObj = this.createMenuUl(item.menus,layerIndex+1,liObj.guid);
         }
         let content = '<label>'+item.title+'</label><span class="icon">'+icon+'</span>';
         li.innerHTML = content;
@@ -126,15 +136,25 @@ class RightMenu{
 
         li.addEventListener('click',this.itemClickHandler);
         li.addEventListener('mouseover',this.itemOverHandler);
-        li.addEventListener('mouseout',this.itemOutHandler);
-        return li;
+        // li.addEventListener('mouseout',this.itemOutHandler);
+        return liObj;
     }
 
     /**
      * 注册点击事件
      */
-    itemClickHandler(event){
-        console.log('注册点击事件',event);
+    itemClickHandler = (event) =>{
+        let curNode = event.currentTarget;
+        let guid = curNode.guid;
+        let layerIndex = curNode.layerIndex;
+        if(curNode.isChildren){
+            this.showUL(curNode,guid,layerIndex,2);
+        }else{
+            if(this.callback){
+                this.callback(curNode.mark);
+            }
+            this.destroy();
+        }
     }
 
     /**
@@ -142,64 +162,145 @@ class RightMenu{
      */
     itemOverHandler = (event) => {
         let curNode = event.currentTarget;
-        let curNodeUl = curNode.childrenMenus;
-        clearTimeout(this.timer);
-        this.timer = setTimeout(()=>{
-            this.delayShowUL(curNode,curNodeUl);
-            // console.log(this)
-        },this.delayTimer);
+        let guid = curNode.guid;
+        let layerIndex = curNode.layerIndex;
+        
+        this.showUL(curNode,guid,layerIndex,this.delayTimer);
         
         
         // console.log('滑过事件',event);
+    }
+
+    /**
+     * show菜单
+     */
+    showUL(curNode,guid,layerIndex,_delayTime){
+        let curliObj = null;
+        let parentliObj = null;
+        let sameLayers = [];
+
+        getSelfAndSame(this.mainMenu.lis,guid,null);
+        //若是guid为自己，则查找并显示自己下一级的菜单，否则递归查询同级下一级，将其移除
+        function getSelfAndSame(lis,guid,_parentliObj){
+            for(let i=0;i<lis.length;i++){
+                let liObj = lis[i];
+                if(liObj.guid === guid){
+                    curliObj = liObj;
+                    parentliObj = _parentliObj;
+                }
+                else if(liObj.layerIndex === layerIndex){
+                    sameLayers.push(liObj);
+                }else{
+                    if(liObj.ulObj){
+                        getSelfAndSame(liObj.ulObj.lis,guid,liObj);
+                    }
+                }
+            }
+        }
+        if(parentliObj){
+            if(parentliObj.dom.className.indexOf('selected')===-1){
+                parentliObj.dom.classList.add('selected')
+            }
+        }
+        function removeSameLayerSelected(lis){
+            for(let i=0;i<lis.length;i++){
+                let liObj = lis[i];
+                if(liObj.dom.className.indexOf('selected')>-1){
+                    liObj.dom.classList.remove('selected')
+                }
+                if(liObj.ulObj){
+                    removeSameLayerSelected(liObj.ulObj.lis);
+                }
+            }
+        }
+        removeSameLayerSelected(sameLayers);
+
+        clearTimeout(this.timer);
+        this.timer = setTimeout(()=>{
+            this.delayShowUL(curNode,curliObj,parentliObj,sameLayers);
+        },_delayTime);
     }
     /**
      * 
      * @param {*} event 
      */
-    delayShowUL(curNode,curNodeUl){
-        console.log('safdjaslfdkjaslfdkja;sf')
+    delayShowUL(curNode,curliObj,parentliObj,sameLayers){
         
-        // if(curNodeUl){
-        //     clearTimeout(this.timer);
-        //     this.timer
+        // let mainMenu = this.mainMenu;
+        // let curliObj = null;
+        // let parentliObj = null;
+        // let sameLayers = [];
+
+        // getSelfAndSame(this.mainMenu.lis,guid,null);
+        // //若是guid为自己，则查找并显示自己下一级的菜单，否则递归查询同级下一级，将其移除
+        // function getSelfAndSame(lis,guid,_parentliObj){
+        //     for(let i=0;i<lis.length;i++){
+        //         let liObj = lis[i];
+        //         if(liObj.guid === guid){
+        //             curliObj = liObj;
+        //             parentliObj = _parentliObj;
+        //         }
+        //         else if(liObj.layerIndex === layerIndex){
+        //             sameLayers.push(liObj);
+        //         }else{
+        //             if(liObj.ulObj){
+        //                 getSelfAndSame(liObj.ulObj.lis,guid,liObj);
+        //             }
+        //         }
+        //     }
         // }
-        let curW = curNode.offsetWidth,curH = curNode.offsetHeight;
-        let parW = curNode.parentNode.offsetWidth,parH = curNode.parentNode.offsetHeight,stageW = document.body.clientWidth,stageH = document.body.clientHeight;
-        // let x = event.clientX,y = event.clientY;
-        let pos = curNode.getBoundingClientRect();
-        let x = parW + pos.left,y = pos.top;
-        if(x+parW>stageW){
-            x -= 2*parW;
+        //删除同级下的所有菜单
+        function removeSameLayerMenu(lis){
+            for(let i=0;i<lis.length;i++){
+                let liObj = lis[i];
+                // if(liObj.dom.className.indexOf('selected')>-1){
+                //     liObj.dom.classList.remove('selected')
+                // }
+                if(liObj.ulObj){
+                    if(liObj.ulObj.dom.parentNode){
+                        liObj.ulObj.dom.parentNode.removeChild(liObj.ulObj.dom);
+                    }
+                    removeSameLayerMenu(liObj.ulObj.lis);
+                }
+            }
         }
-        // if(y+parH>stageH){
-        //     y = Math.min(y-parH,stageH-parH,0);
-        // }
+        removeSameLayerMenu(sameLayers);
         
-        if(curNodeUl){
-            document.body.appendChild(curNodeUl);
-            curNodeUl.style.zIndex = Utils.getMaxZindex();
-            let nowH = curNodeUl.offsetHeight;
+        //显示当前级下的菜单
+        if(curliObj.ulObj){
+            //如果当前级下还有显示的菜单，同样移除
+            if(curliObj.ulObj.lis.length > 0){
+                removeSameLayerMenu(curliObj.ulObj.lis);
+            }
+            let curW = curNode.offsetWidth,stageW = document.body.clientWidth,stageH = document.body.clientHeight;
+            let pos = curNode.getBoundingClientRect();
+            let x = curW + pos.left,y = pos.top;
+            if(x+curW>stageW){
+                x -= 2*curW;
+            }
+            let ulDom = curliObj.ulObj.dom;
+            document.body.appendChild(ulDom);
+            ulDom.style.zIndex = Utils.getMaxZindex();
+            let nowH = ulDom.offsetHeight;
             if(y+nowH>stageH){
                 y = Math.min(y,stageH-nowH);
             }
-            curNodeUl.style.left = x+"px";
-            curNodeUl.style.top = y+"px";
-        }else{
-            // if(curNodeUl.parentNode){
-            //     curNodeUl.parentNode.removeChild(curNodeUl);
-            // }
+            ulDom.style.left = x+"px";
+            ulDom.style.top = y+"px";
         }
+        // if(parentliObj){
+        //     if(parentliObj.dom.className.indexOf('selected')===-1){
+        //         parentliObj.dom.classList.add('selected')
+        //     }
+        // }
+        // console.log(parentliObj)
     }
     /**
      * 滑开事件
      */
-    itemOutHandler(event){
-        // let curNode = event.currentTarget;
-        // let curNodeUl = curNode.childrenMenus;
-        // if(curNodeUl && curNodeUl.parentNode){
-        //     curNodeUl.parentNode.removeChild(curNodeUl);
-        // }
-    }
+    // itemOutHandler(event){
+
+    // }
 
     /**
      * 文档按下事件
@@ -207,7 +308,23 @@ class RightMenu{
      */
     mousedownHandler = (event) => {
         let e = event ? event : window.event;
-        if(e.target == this.root || this.root.contains(e.target)){
+        let curDom = e.target;
+        let isInSide = false;
+        function findDom(ulObj){
+            let dom = ulObj.dom;
+            if(dom == curDom || dom.contains(curDom)){
+                isInSide = true;
+                return;
+            }
+            for(let i=0;i<ulObj.lis.length;i++){
+                let liObj = ulObj.lis[i];
+                if(liObj.ulObj){
+                    findDom(liObj.ulObj);
+                }
+            }
+        }
+        findDom(this.mainMenu);
+        if(isInSide){
             return;
         }
         this.destroy();
@@ -218,36 +335,24 @@ class RightMenu{
     destroy(){
         // console.log('aaaaaaaa',this)
         document.removeEventListener("mousedown",this.mousedownHandler);
-        //遍历子节点
-        document.body.removeChild(this.root);
-        // console.log(this.root.childNodes,this.root.children);
+        // console.log('应该销毁！！')
         let self = this;
-        if(this.root.children){
-            destroy2(this.root.children);
-        }
-        // if(this.root.childNodes){
-        //     destroy2(this.root.childNodes);
-        // }
-        
-        function destroy2(nodes){
-            for(let i=0;i<nodes.length;i++){
-                // console.log(nodes[i].nodeName);
-                let node = nodes[i];
-                if(node.className.indexOf('rm-menuitem')>-1){
-                    if(node.className.indexOf('divider')===-1){
-                        node.removeEventListener('click',self.itemClickHandler);
-                        node.removeEventListener('mouseover',self.itemOverHandler);
-                        node.removeEventListener('mouseout',self.itemOutHandler);
-                    }
-                }else if(node.className.indexOf('right-menu-tsh')>-1){
-                    console.log(node,node.parentNode);
-                    if(node.parentNode){
-                        node.parentNode.removeChild(node);
-                    }
+        function delAll(ulObj){
+            let dom = ulObj.dom;
+            if(dom.parentNode){
+                dom.parentNode.removeChild(dom);
+            }
+            for(let i=0;i<ulObj.lis.length;i++){
+                let liObj = ulObj.lis[i];
+                liObj.dom.removeEventListener('click',self.itemClickHandler);
+                liObj.dom.removeEventListener('mouseover',self.itemOverHandler);
+                // liObj.dom.removeEventListener('mouseout',self.itemOutHandler);
+                if(liObj.ulObj){
+                    delAll(liObj.ulObj);
                 }
-                // if(node.name)
             }
         }
+        delAll(this.mainMenu);
     }
 }
 

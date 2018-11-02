@@ -14,7 +14,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname +'/dist'),
-        filename: "dist/RightMenu.js",
+        filename: "RightMenu.js",
         library: 'RightMenu',
         libraryExport: "default",
         libraryTarget: 'umd',

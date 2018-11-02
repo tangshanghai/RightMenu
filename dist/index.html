@@ -1,58 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>右键菜单测试</title>
-    <style>
-        *{
-            margin: 0px;
-            padding: 0px;
-            box-sizing: border-box;
-            font-size: 12px;
-        }
-        html,body{
-            width: 100%;
-            height: 100%;
-        }
-        #app{
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        .btn{
-            position: absolute;
-        }
-        #btn2{
-            right: 0;
-            top: 0;
-        }
-        #btn3{
-            top: 50%;
-            left: 50%;
-        }
-        #btn4{
-            left: 0;
-            bottom: 0;
-        }
-        #btn5{
-            right: 0;
-            bottom: 0;
-        }
-    </style>
-</head>
-<body>
-<div id="app">
-    <button id="btn1" class="btn">左上角</button>
-    <button id="btn2" class="btn">右上角</button>
-    <button id="btn3" class="btn">中间</button>
-    <button id="btn4" class="btn">左下角</button>
-    <button id="btn5" class="btn">右下角</button>
-</div>
-</body>
-<script>
-    var rightMenu = new RightMenu();
+<!doctype html> <html lang=en> <head> <meta charset=UTF-8> <meta name=viewport content="width=device-width,initial-scale=1"> <meta http-equiv=X-UA-Compatible content="ie=edge"> <title>右键菜单测试</title> <style>*{margin:0;padding:0;box-sizing:border-box;font-size:12px}body,html{width:100%;height:100%}#app{width:100%;height:100%;position:relative}.btn{position:absolute}#btn2{right:0;top:0}#btn3{top:50%;left:50%}#btn4{left:0;bottom:0}#btn5{right:0;bottom:0}</style> </head> <body> <div id=app> <button id=btn1 class=btn>左上角</button> <button id=btn2 class=btn>右上角</button> <button id=btn3 class=btn>中间</button> <button id=btn4 class=btn>左下角</button> <button id=btn5 class=btn>右下角</button> </div> <script type="text/javascript" src="RightMenu.js"></script></body> <script> var rightMenu = new RightMenu();
     var btns = document.querySelectorAll('.btn');
     btns.forEach(ele=>{
         ele.addEventListener('contextmenu',contextmenuHandler);
@@ -139,6 +85,4 @@
         rightMenu.show(options,(mark)=>{
             console.log('asdfsafsafdsafdsadfsafsafsdfa',mark);
         })
-    }
-</script>
-</html>
+    } </script> </html>
