@@ -3,7 +3,7 @@ import './RightMenu.css';
 class RightMenu{
     constructor(){
 
-        console.log('==============RightMenu 0.0.0=================')
+        console.log('==============RightMenu 0.0.1=================')
         this.mainMenu = null;//document.createElement('div');
         // this.root.classList.add('right-menu-tsh');
 
@@ -49,7 +49,9 @@ class RightMenu{
      * @param {*返回函数} callback 
      */
     show(_menudata,callback){
-
+        if(this.mainMenu){
+            this.destroy();
+        }
         document.addEventListener("mousedown",this.mousedownHandler);
 
         this.callback = callback;
@@ -136,6 +138,7 @@ class RightMenu{
 
         li.addEventListener('click',this.itemClickHandler);
         li.addEventListener('mouseover',this.itemOverHandler);
+        li.addEventListener('contextmenu',this.contextmenuHandler);
         // li.addEventListener('mouseout',this.itemOutHandler);
         return liObj;
     }
@@ -169,6 +172,14 @@ class RightMenu{
         
         
         // console.log('滑过事件',event);
+    }
+
+    /** 右键点击事件 */
+    contextmenuHandler = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log('右键点击事件右键点击事件右键点击事件')
     }
 
     /**
@@ -346,6 +357,7 @@ class RightMenu{
                 let liObj = ulObj.lis[i];
                 liObj.dom.removeEventListener('click',self.itemClickHandler);
                 liObj.dom.removeEventListener('mouseover',self.itemOverHandler);
+                liObj.dom.addEventListener('contextmenu',self.contextmenuHandler);
                 // liObj.dom.removeEventListener('mouseout',self.itemOutHandler);
                 if(liObj.ulObj){
                     delAll(liObj.ulObj);

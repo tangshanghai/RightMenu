@@ -7,6 +7,7 @@
 } */
 .right-menu-tsh *{
     box-sizing: border-box;
+    pointer-events: all;
 }
 
 .right-menu-tsh{
@@ -19,6 +20,7 @@
     position: fixed;
     left: 0;
     top: 0;
+    pointer-events: none;
 }
 .right-menu-tsh li{
     width: 100%;
