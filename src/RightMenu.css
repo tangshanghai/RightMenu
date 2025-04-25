@@ -12,7 +12,8 @@
 
 .right-menu-tsh{
     list-style: none;
-    width: 260px;
+    /* width: 260px; */
+    min-width: 120px;
     padding: 3px 0px;
     background-color: #ffffff;
     border: 1px solid #bababa;
@@ -31,17 +32,36 @@
     color: #000;
     cursor: default;
     padding: 0 20px;
+    position: relative;
+}
+.right-menu-tsh li.checked:before{
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    width: 6px;
+    height: 10px;
+    border: 2px solid #000;
+    border-left: none;
+    border-top: none;
+    transform: rotate(45deg);
+    box-sizing: border-box;
 }
 .right-menu-tsh li label{
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: keep-all;
+    margin-right: 10px;
 }
 .right-menu-tsh li .icon{
     color: #a1a192;
-    max-width: 60px;
+    /* max-width: 60px; */
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: keep-all;
+    min-width: 60px;
+    text-align: right;
 }
 .right-menu-tsh li .icon .arrow{
     display: inline-block;

@@ -3,7 +3,7 @@ import './RightMenu.css';
 class RightMenu{
     constructor(){
 
-        console.log('==============RightMenu 0.0.1=================')
+        console.log('==============RightMenu 0.0.3=================')
         this.mainMenu = null;//document.createElement('div');
         // this.root.classList.add('right-menu-tsh');
 
@@ -90,7 +90,7 @@ class RightMenu{
         let ulObj = {
             type: 'ul',
             dom: document.createElement('ul'),
-            lis: []
+            lis: [],
         }
         let ul = ulObj.dom;
         ul.classList.add('right-menu-tsh');
@@ -132,6 +132,9 @@ class RightMenu{
         }
         let content = '<label>'+item.title+'</label><span class="icon">'+icon+'</span>';
         li.innerHTML = content;
+        if(item.checked){
+            li.classList.add('checked');
+        }
         if(item.disabled){
             li.classList.add('disabled');
         }
@@ -179,7 +182,7 @@ class RightMenu{
         event.preventDefault();
         event.stopPropagation();
 
-        console.log('右键点击事件右键点击事件右键点击事件')
+        // console.log('右键点击事件右键点击事件右键点击事件')
     }
 
     /**
@@ -286,15 +289,22 @@ class RightMenu{
             let curW = curNode.offsetWidth,stageW = document.body.clientWidth,stageH = document.body.clientHeight;
             let pos = curNode.getBoundingClientRect();
             let x = curW + pos.left,y = pos.top;
-            if(x+curW>stageW){
-                x -= 2*curW;
-            }
+            // if(x+curW>stageW){
+            //     x -= 2*curW;
+            // }
             let ulDom = curliObj.ulObj.dom;
+            if(ulDom.isDestroy){
+                // console.log('本身已经销毁，不能添加')
+                return;
+            }
             document.body.appendChild(ulDom);
             ulDom.style.zIndex = Utils.getMaxZindex();
             let nowH = ulDom.offsetHeight;
             if(y+nowH>stageH){
                 y = Math.min(y,stageH-nowH);
+            }
+            if(x+curW>stageW){
+                x -= (curW+ulDom.offsetWidth);
             }
             ulDom.style.left = x+"px";
             ulDom.style.top = y+"px";
@@ -345,14 +355,18 @@ class RightMenu{
      */
     destroy(){
         // console.log('aaaaaaaa',this)
+        this.isDestroy = true;
         document.removeEventListener("mousedown",this.mousedownHandler);
-        // console.log('应该销毁！！')
+        // console.log('应该销毁！！',this.mainMenu)
+        // const domList = [];
         let self = this;
         function delAll(ulObj){
             let dom = ulObj.dom;
             if(dom.parentNode){
                 dom.parentNode.removeChild(dom);
             }
+            dom.isDestroy = true;
+            // domList.push(dom);
             for(let i=0;i<ulObj.lis.length;i++){
                 let liObj = ulObj.lis[i];
                 liObj.dom.removeEventListener('click',self.itemClickHandler);
@@ -365,6 +379,14 @@ class RightMenu{
             }
         }
         delAll(this.mainMenu);
+
+        // setTimeout(() => {
+        //     domList.forEach(dom => {
+        //         if(dom.parentNode){
+        //             dom.parentNode.removeChild(dom);
+        //         }
+        //     })
+        // },1000);
     }
 }
 

@@ -57,7 +57,128 @@
     btns.forEach(ele=>{
         ele.addEventListener('contextmenu',contextmenuHandler);
     })
-
+    const testMenu = [
+                {
+                    title: '快速布局',
+                    mark: 'layout_group',
+                    menus: [
+                        {
+                            title:'拷贝当前场景布局',
+                            mark:'layout_copy'
+                        },
+                        {
+                            title:'粘贴布局到当前场景',
+                            mark:'layout_paste_current',
+                            disabled: true,
+                        },
+                        {
+                            title:'将当前应用到全部',
+                            mark:'layout_apply_all'
+                        },
+                        {
+                            title:'将当前应用到前面',
+                            mark:'layout_apply_prev'
+                        },
+                        {
+                            title:'将当前应用到后面',
+                            mark:'layout_apply_next'
+                        },
+                    ]
+                },
+                {
+                    title: '重置位置',
+                    mark: 'reset_pos_group',
+                    menus: [
+                        {
+                            title: '重置背景位置',
+                            mark: 'reset_pos_bg',
+                            checked: false
+                        },
+                        {
+                            title: '重置主素材位置',
+                            mark: 'reset_pos_main',
+                            checked: false
+                        },
+                        {
+                            title: '重置数字人位置',
+                            mark: 'reset_pos_digitalHuman',
+                            checked: false
+                        },
+                        {
+                            title: '重置原文字幕位置',
+                            mark: 'reset_pos_originalText',
+                            checked: false
+                        },
+                        {
+                            title: '重置译文字幕位置',
+                            mark: 'reset_pos_translationText',
+                            checked: false
+                        }
+                    ]
+                },
+                {
+                    title: '锁定图层',
+                    mark: 'lock_group',
+                    menus: [
+                        {
+                            title: '锁定背景层',
+                            mark: 'lock_bg',
+                            checked: false
+                        },
+                        {
+                            title: '锁定主素材层',
+                            mark: 'lock_main',
+                            checked: false
+                        },
+                        {
+                            title: '锁定数字人层',
+                            mark: 'lock_digitalHuman',
+                            checked: false
+                        },
+                        {
+                            title: '锁定原文字幕层',
+                            mark: 'lock_originalText',
+                            checked: false
+                        },
+                        {
+                            title: '锁定译文字幕层',
+                            mark: 'lock_translationText',
+                            checked: false
+                        },
+                        {
+                            title: '锁定装饰层1',
+                            mark: 'lock_decoration1',
+                            checked: false
+                        },
+                        {
+                            title: '锁定装饰层2',
+                            mark: 'lock_decoration2',
+                            checked: false
+                        },
+                        {
+                            title: '锁定装饰层3',
+                            mark: 'lock_decoration3',
+                            checked: false
+                        },
+                        {
+                            title: '锁定装饰层4',
+                            mark: 'lock_decoration4',
+                            checked: false
+                        }
+                    ]
+                },
+                {
+                    divider: true
+                },
+                {
+                    title:'锁定全部图层',
+                    mark:'lock_all'
+                },
+                {
+                    title:'解锁全部图层',
+                    mark:'unlock_all'
+                }
+            ]
     function contextmenuHandler(event){
         event.preventDefault();
         event.stopPropagation();
@@ -65,10 +186,66 @@
         
         let options = {
             menus:[
+            {
+                    title: '显示TC码',
+                    mark: 'tc_time',
+                    menus: [
+                        {
+                            title: '时码位置',
+                            mark: 'tc_time_pos',
+                            menus: [
+                                {
+                                    title: '左上',
+                                    mark: 'tc_left_top',
+                                },
+                                {
+                                    title: '左下',
+                                    mark: 'tc_left_bottom',
+                                },
+                                {
+                                    title: '右上',
+                                    mark: 'tc_right_top',
+                                },
+                                {
+                                    title: '右下',
+                                    mark: 'tc_right_bottom',
+                                    checked: true
+                                },
+                                {
+                                    title: '居中',
+                                    mark: 'tc_center_center',
+                                }
+                            ]
+                        },
+                        {
+                            title: '全部显示',
+                            mark: 'tc_time_show_all',
+                            checked: false
+                        },
+                        {
+                            title: '视频',
+                            mark: 'tc_time_show_v',
+                            checked: false
+                        },
+                        {
+                            title: '音频子子孙孙子子孙孙子子孙孙子子孙孙子子孙孙子子孙孙',
+                            mark: 'tc_time_show_a',
+                            checked: false
+                        }
+                    ]
+                },
                 {
-                    title:'menu1',
+                    divider: true
+                },
+                {
+                    title:'属性xxxxxxxxxxxxxxxxxxAAA',
+                    mark:'property'
+                },
+                {
+                    title:'属性222xxxxxxxxxxxxxxxxxxAAA',
                     shortKey: 'Alt+B',
-                    mark:'1'
+                    mark:'1',
+                    checked: true
                 },
                 {
                     title:'menu2',
@@ -84,11 +261,13 @@
                             menus:[
                                 {
                                     title:'menu2-2-1',
-                                    mark:'2-2-1'
+                                    mark:'2-2-1',
+                                    checked: true
                                 },
                                 {
                                     title:'menu2-2-2',
-                                    mark:'2-2-2'
+                                    mark:'2-2-2',
+                                    checked: false
                                 }
                             ]
                         }
@@ -136,6 +315,7 @@
             ],
             event:event
         };
+        options.menus = testMenu;
         rightMenu.show(options,(mark)=>{
             console.log('asdfsafsafdsafdsadfsafsafsdfa',mark);
         })
